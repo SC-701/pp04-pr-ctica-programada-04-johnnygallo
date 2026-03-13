@@ -43,10 +43,26 @@ jobs:
         uses: NuGet/setup-nuget@v1
 
       - name: Agregar Paquetes Source Privado
-        run: nuget sources add -name "Paquetes" -
+        run: |
+          $content = @"
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <packageSources>
+              <add key="github" value="https://nuget.pkg.github.com/SC-701/index.json" />
+            </packageSources>
+            <packageSourceCredentials>
+              <github>
+                <add key="Username" value="${{ github.actor }}" />
+                <add key="ClearTextPassword" value="${{ secrets.Paquetes_TOKEN }}" />
+              </github>
+            </packageSourceCredentials>
+          </configuration>
+          "@
+          $content | Out-File -FilePath "Seguridad/Seguridad.API/NuGet.Config" -Encoding utf8
+        shell: powershell
         
       - name: Restore NuGet packages
-        run: nuget restore "Seguridad/Seguridad.API/Seguridad.sln" -Source "https://nuget.pkg.github.com/SC-701/index.json"
+        run: nuget restore "Seguridad/Seguridad.API/Seguridad.sln"
 
       - name: Build Database Project
         run: |
